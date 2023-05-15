@@ -132,6 +132,39 @@ const throttle = function(fn,time=500,errFn){
     }, time);
   }
 }
+const deepMerge = function(target, source) {
+  if (typeof target !== "object" || typeof source !== "object") {
+    return source;
+  }
+
+  const merged = Array.isArray(target) ? target.slice() : { ...target };
+  for (const key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      if (merged.hasOwnProperty(key)) {
+        if (Array.isArray(merged[key]) && Array.isArray(source[key])) {
+          const maxLength = Math.max(merged[key].length, source[key].length);
+          merged[key] = [];
+          for (let i = 0; i < maxLength; i++) {
+            const mergedVal = merged[key][i];
+            const sourceVal = source[key][i];
+            if (typeof mergedVal === "object" && typeof sourceVal === "object") {
+              merged[key][i] = deepMerge(mergedVal, sourceVal);
+            } else {
+              merged[key][i] = sourceVal !== undefined ? sourceVal : mergedVal;
+            }
+          }
+        } else if (typeof merged[key] === "object" && typeof source[key] === "object") {
+          merged[key] = deepMerge(merged[key], source[key]);
+        } else {
+          merged[key] = source[key] !== undefined ? source[key] : merged[key];
+        }
+      } else {
+        merged[key] = source[key];
+      }
+    }
+  }
+  return merged;
+};
 export default {
   formatterDate,
   formatNumber1,
@@ -142,5 +175,6 @@ export default {
   getStartDayOfWeek: getStartDayOfWeek,
   getEndDayOfWeek: getEndDayOfWeek,
   debounce,
-  throttle
+  throttle,
+  deepMerge
 }
