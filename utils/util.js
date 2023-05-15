@@ -133,26 +133,25 @@ const throttle = function(fn,time=500,errFn){
   }
 }
 const deepMerge = function(target, source) {
-  if (typeof target !== "object" || typeof source !== "object") {
+  if (target == null || source == null) {
     return source;
   }
 
-  const merged = Array.isArray(target) ? target.slice() : { ...target };
+  const merged = Array.isArray(target) ? target.slice() : Object.assign({}, target);
   for (const key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       if (merged.hasOwnProperty(key)) {
         if (Array.isArray(merged[key]) && Array.isArray(source[key])) {
           const maxLength = Math.max(merged[key].length, source[key].length);
-          merged[key] = [];
-          for (let i = 0; i < maxLength; i++) {
+          merged[key] = Array(maxLength).fill(undefined).map((_, i) => {
             const mergedVal = merged[key][i];
             const sourceVal = source[key][i];
-            if (typeof mergedVal === "object" && typeof sourceVal === "object") {
-              merged[key][i] = deepMerge(mergedVal, sourceVal);
-            } else {
-              merged[key][i] = sourceVal !== undefined ? sourceVal : mergedVal;
-            }
-          }
+            return typeof mergedVal === "object" && typeof sourceVal === "object"
+              ? deepMerge(mergedVal, sourceVal)
+              : sourceVal !== undefined
+              ? sourceVal
+              : mergedVal;
+          });
         } else if (typeof merged[key] === "object" && typeof source[key] === "object") {
           merged[key] = deepMerge(merged[key], source[key]);
         } else {
