@@ -40,10 +40,12 @@ export const options = {
     }
     element.removeEventListener('scroll', el.__VueScrollCallBack)
     
-  },
-  inserted:options.mounted,
-  unbind:options.unmounted
+  }
+ 
 }
+// 兼容vue2
+options.inserted=options.mounted
+options.unbind=options.unmounted
 export default {
   install:function (Vue) {
     Vue.directive('scroll-bottom', options) 
